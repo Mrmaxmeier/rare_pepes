@@ -1,0 +1,6 @@
+flask
+sqlalchemy
+Flask-SQLAlchemy
+imgurpython
+Flask-Script
+psycopg2
