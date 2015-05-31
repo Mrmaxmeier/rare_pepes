@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, stream_with_context
 from flask.ext.script import Manager
 from database import db, Pepe
 import sys
@@ -41,12 +41,7 @@ def index():
 @app.route("/api/get_pepes", methods=["POST"])
 @json_out
 def get_pepes(nsfw=False):
-	allowed_nsfwness = 0.0 if nsfw else 1.0
-	all_pepes = db.session.query(Pepe).filter(Pepe.nsfwness <= allowed_nsfwness)
-	r1 = random.randrange(0, all_pepes.count())
-	r2 = random.randrange(0, all_pepes.count())
-	p1 = all_pepes[r1]
-	p2 = all_pepes[r2]
+	p1, p2 = Pepe.get_two()
 	return [p1.info(), p2.info()]
 
 @app.route("/api/vote/<int:id>", methods=["POST"])
@@ -54,7 +49,11 @@ def vote(id):
 	pepe = Pepe.query.get(id)
 	if pepe:
 		pepe.rareness += 1
-	return get_pepes()
+	p1, p2 = Pepe.get_two()
+	def generate():
+		yield json.dumps([p1.info(), p2.info()])
+		db.session.commit()
+	return Response(stream_with_context(generate()), mimetype='application/json')
 
 
 manager = Manager(app)

@@ -60,7 +60,17 @@
 				break
 		}
 		console.log("voting for", pepe.id)
-		$.post("/api/vote/"+pepe.id, {}, update_pepes)
+		var xhr = new XMLHttpRequest();
+		xhr.open('POST', '/api/vote/'+pepe.id, true);
+		xhr.send(null);
+		xhr.onreadystatechange = function(e) {
+			if (xhr.response) {
+				var data = JSON.parse(xhr.response)
+				xhr.abort()
+				update_pepes(data)
+			}
+		}
+
 	}
 
 
