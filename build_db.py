@@ -12,7 +12,9 @@ client = ImgurClient(c_id, c_secret)
 
 def main(app):
 	with app.app_context():
+		print("dropping...")
 		db.drop_all()
+		print("creating structure...")
 		db.create_all()
 	for i, img in enumerate(client.get_album_images(album)):
 		pepe = Pepe(link=img.link)
