@@ -79,12 +79,10 @@ def deduplicate(app):
 			save_if_due()
 	db.session.commit()
 
-def crawl_reddit(app):
-	r = praw.Reddit(user_agent='my_cool_application')
-	submissions = r.get_subreddit('pepethefrog').get_hot(limit=20)
-	from pprint import pprint
+def crawl_reddit(app, amount=20):
+	r = praw.Reddit(user_agent='rare_pepes')
+	submissions = r.get_subreddit('pepethefrog').get_hot(limit=amount)
 	for s in submissions:
-		#pprint(vars(s))
 		print()
 		if s.domain in ["imgur.com", "i.imgur.com"]:
 			print(s.url)

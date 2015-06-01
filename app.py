@@ -72,8 +72,8 @@ def deduplicate():
 	db_tools.deduplicate(app)
 
 @manager.command
-def crawl_reddit():
-	db_tools.crawl_reddit(app)
+def crawl_reddit(amount=20):
+	db_tools.crawl_reddit(app, amount=20)
 
 
 if __name__ == '__main__':
