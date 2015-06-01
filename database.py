@@ -8,11 +8,11 @@ class Pepe(db.Model):
 	link = db.Column(db.Text)
 	rareness = db.Column(db.Float)
 	nsfw = db.Column(db.Boolean)
+	md5 = db.Column(db.String(32))
 
 	def __init__(self, link):
 		self.link = link
 		self.rareness = 0
-		self.nsfw = False
 
 	def info(self):
 		return {

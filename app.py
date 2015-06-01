@@ -1,6 +1,7 @@
 from flask import Flask, render_template, Response, stream_with_context
 from flask.ext.script import Manager
 from database import db, Pepe
+import db_tools
 import sys
 import os
 import random
@@ -60,8 +61,15 @@ manager = Manager(app)
 
 @manager.command
 def build_db():
-	from build_db import main
-	main(app)
+	db_tools.build_db(app)
+
+@manager.command
+def get_md5s():
+	db_tools.get_md5s(app)
+
+@manager.command
+def deduplicate():
+	db_tools.deduplicate(app)
 
 
 if __name__ == '__main__':
