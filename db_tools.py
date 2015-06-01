@@ -1,4 +1,6 @@
 from imgurpython import ImgurClient
+from imgurpython.helpers.error import ImgurClientError
+import praw
 from time import sleep
 from database import db, Pepe
 from sqlalchemy import func
@@ -21,12 +23,12 @@ def save_if_due():
 		print("saving")
 		db.session.commit()
 
-def add_from_img(img):
+def add_from_img(img, nsfw=False):
 	pepe = Pepe(link=img.link)
-	if 1.5 > img.width / img.height > 0.5:
-		print("Wrong aspect ratio")
+	if not (1.5 > (img.width / img.height) > 0.75):
+		print("Wrong aspect ratio", img.width/img.height, img.width, img.height)
 		return
-	if img.nsfw:
+	if img.nsfw or nsfw:
 		pepe.nsfw = True
 	pepe.rareness -= img.views * 0.0001
 	db.session.add(pepe)
@@ -75,4 +77,33 @@ def deduplicate(app):
 			print("Duplicate found", pepe)
 			db.session.delete(pepe)
 			save_if_due()
+	db.session.commit()
+
+def crawl_reddit(app):
+	r = praw.Reddit(user_agent='my_cool_application')
+	submissions = r.get_subreddit('pepethefrog').get_hot(limit=20)
+	from pprint import pprint
+	for s in submissions:
+		#pprint(vars(s))
+		print()
+		if s.domain in ["imgur.com", "i.imgur.com"]:
+			print(s.url)
+			i_id = s.url.split("/")[-1]
+			if len(i_id.split(".")) > 1:
+				i_id = ".".join(i_id.split(".")[0:-1])
+			print(i_id)
+
+			try:
+				if not "/a/" in s.url:
+					img = client.get_image(i_id)
+					add_from_img(img, nsfw=s.over_18)
+				else:
+					print("Album detected.")
+					for img in client.get_album_images(i_id):
+						print(img)
+						add_from_img(img)
+			except ImgurClientError as e:
+				print(e.error_message)
+				print(e.status_code)
+	print("finished crawling")
 	db.session.commit()

@@ -71,6 +71,10 @@ def get_md5s():
 def deduplicate():
 	db_tools.deduplicate(app)
 
+@manager.command
+def crawl_reddit():
+	db_tools.crawl_reddit(app)
+
 
 if __name__ == '__main__':
 	manager.run()

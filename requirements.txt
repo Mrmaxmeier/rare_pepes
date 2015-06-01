@@ -5,3 +5,4 @@ imgurpython
 Flask-Script
 psycopg2
 requests
+praw
