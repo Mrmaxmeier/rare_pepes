@@ -1,6 +1,6 @@
 from flask import Flask, render_template, Response, stream_with_context
 from flask.ext.script import Manager
-from database import db, Pepe
+from database import db, Pepe, PepeCombination, pending_votes
 import db_tools
 import sys
 import os
@@ -42,18 +42,14 @@ def index():
 @app.route("/api/get_pepes", methods=["POST"])
 @json_out
 def get_pepes(nsfw=False):
-	p1, p2 = Pepe.get_two()
-	return [p1.info(), p2.info()]
+	return Pepe.get_two().info()
 
-@app.route("/api/vote/<int:id>", methods=["POST"])
-def vote(id):
-	pepe = Pepe.query.get(id)
-	if pepe:
-		pepe.rareness += 1
-	p1, p2 = Pepe.get_two()
+@app.route("/api/vote/<string:uuid>", methods=["POST"])
+def vote(uuid):
 	def generate():
-		yield json.dumps([p1.info(), p2.info()])
-		db.session.commit()
+		yield json.dumps(Pepe.get_two().info())
+		if uuid in pending_votes:
+			pending_votes[uuid]()
 	return Response(stream_with_context(generate()), mimetype='application/json')
 
 

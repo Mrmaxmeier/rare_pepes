@@ -1,7 +1,10 @@
 from flask.ext.sqlalchemy import SQLAlchemy
 import random
+import uuid
 
-db = SQLAlchemy()
+db = SQLAlchemy(session_options={"expire_on_commit": False})
+
+pending_votes = {}
 
 class Pepe(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -28,7 +31,36 @@ class Pepe(db.Model):
 		r1 = random.randrange(0, all_pepes.count())
 		r2 = random.randrange(1, all_pepes.count())
 		if r2 <= r1: r2 -= 1
-		return all_pepes[r1], all_pepes[r2]
+		db.session.expunge_all()
+		return PepeCombination(all_pepes[r1], all_pepes[r2])
 
 	def __repr__(self):
 		return "<Pepe(id={}, link={}, rareness={}, nsfw={}>".format(self.id, self.link, self.rareness, self.nsfw)
+
+class PepeCombination:
+	def __init__(self, p1, p2):
+		self.p1 = p1
+		self.p2 = p2
+		self.u1 = str(uuid.uuid4())
+		self.u2 = str(uuid.uuid4())
+
+		def vote(more_rare_pepe, less_rare_pepe):
+			def f():
+				more_rare_pepe.rareness += 1
+				db.session.commit()
+				if self.u1 in pending_votes:
+					del pending_votes[self.u1]
+				if self.u2 in pending_votes:
+					del pending_votes[self.u2]
+			return f
+
+		self.v1 = vote(p1, p2)
+		self.v2 = vote(p2, p1)
+		pending_votes[self.u1] = self.v1
+		pending_votes[self.u2] = self.v2
+
+	def info(self):
+		return [
+			self.p1.link, self.u1,
+			self.p2.link, self.u2
+		]
