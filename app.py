@@ -50,6 +50,8 @@ def vote(uuid):
 		yield json.dumps(Pepe.get_two().info())
 		if uuid in pending_votes:
 			pending_votes[uuid]()
+		else:
+			print("invalid vote", uuid)
 	return Response(stream_with_context(generate()), mimetype='application/json')
 
 

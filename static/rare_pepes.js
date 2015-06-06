@@ -4,7 +4,8 @@ var p1_loader_timeout;
 var p2_loader_timeout;
 
 var pepe_queue = [];
-var preload = 5;
+var preload = 3;
+var max_queue_size = 5;
 
 function next_pepes() {
 	console.log("setting pepes", pepe_queue[0])
@@ -26,6 +27,10 @@ function preload_pepes(data) {
 }
 
 function process_pepes(data) {
+	if (pepe_queue.length >= max_queue_size) {
+		console.log("max pepe queue size exceeded:", pepe_queue.length)
+		return
+	}
 	console.log("processing pepes", data)
 	preload_pepes(data)
 	pepe_queue.push(data)
@@ -58,12 +63,12 @@ $(document).keypress(function(e) {
 });
 
 function vote(pepe) {
-	if (pepe_queue.length < 2) {
+	if (pepe_queue.length < 3) {
 		console.log("loading emergency pepes...")
 		$.post("/api/get_pepes", {}, process_pepes)
 		$.post("/api/get_pepes", {}, process_pepes)
 	}
-	if (pepe_queue.length < 1) {
+	if (pepe_queue.length < 2) {
 		console.log("not enough emergency pepes...")
 		return
 	}
@@ -78,6 +83,7 @@ function vote(pepe) {
 	pepe_queue.splice(0, 1);
 	next_pepes()
 	console.log("voting for", uuid)
+	console.log("queue size:", pepe_queue.length)
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', '/api/vote/'+uuid, true);
 	xhr.send(null);

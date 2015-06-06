@@ -1,10 +1,17 @@
 from flask.ext.sqlalchemy import SQLAlchemy
 import random
 import uuid
+import time
 
 db = SQLAlchemy(session_options={"expire_on_commit": False})
 
 pending_votes = {}
+last_pending_votes_change = time.time()
+
+def check_pending():
+	if last_pending_votes_change < (time.time() - 120):
+		print("cleaned pending_votes")
+		pending_votes.clear()
 
 class Pepe(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -39,6 +46,7 @@ class Pepe(db.Model):
 
 class PepeCombination:
 	def __init__(self, p1, p2):
+		global last_pending_votes_change
 		self.p1 = p1
 		self.p2 = p2
 		self.u1 = str(uuid.uuid4())
@@ -56,8 +64,12 @@ class PepeCombination:
 
 		self.v1 = vote(p1, p2)
 		self.v2 = vote(p2, p1)
+
+		check_pending()
+
 		pending_votes[self.u1] = self.v1
 		pending_votes[self.u2] = self.v2
+		last_pending_votes_change = time.time()
 
 	def info(self):
 		return [
