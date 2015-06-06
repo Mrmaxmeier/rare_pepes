@@ -4,8 +4,8 @@ var p1_loader_timeout;
 var p2_loader_timeout;
 
 var pepe_queue = [];
-var preload = 3;
-var max_queue_size = 5;
+var preload = 5;
+var max_queue_size = 7;
 
 function next_pepes() {
 	console.log("setting pepes", pepe_queue[0])
@@ -31,6 +31,8 @@ function process_pepes(data) {
 		console.log("max pepe queue size exceeded:", pepe_queue.length)
 		return
 	}
+	data[0] = data[0].replace("http://", "//")
+	data[2] = data[2].replace("http://", "//")
 	console.log("processing pepes", data)
 	preload_pepes(data)
 	pepe_queue.push(data)

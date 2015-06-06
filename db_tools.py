@@ -1,5 +1,6 @@
 from imgurpython import ImgurClient
 from imgurpython.helpers.error import ImgurClientError
+from flask.ext.script import prompt_bool
 import praw
 from time import sleep
 from database import db, Pepe
@@ -43,10 +44,11 @@ def build_db(app):
 		print("creating structure...")
 		db.create_all()
 
-	for album in ["U2dTR"]:
-		for img in client.get_album_images(album):
-			add_from_img(img)
-			#sleep(1)
+	if prompt_bool("Populate from 'rare pepes (tm)' album"):
+		for album in ["U2dTR"]:
+			for img in client.get_album_images(album):
+				add_from_img(img)
+				#sleep(1)
 	db.session.commit()
 
 def get_md5s(app):

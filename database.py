@@ -14,7 +14,7 @@ def check_pending():
 		pending_votes.clear()
 
 class Pepe(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
+	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 	link = db.Column(db.Text)
 	rareness = db.Column(db.Float)
 	nsfw = db.Column(db.Boolean)
@@ -44,6 +44,17 @@ class Pepe(db.Model):
 	def __repr__(self):
 		return "<Pepe(id={}, link={}, rareness={}, nsfw={}>".format(self.id, self.link, self.rareness, self.nsfw)
 
+class Vote(db.Model):
+	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+	voted_pepe_id = db.Column(db.Integer, db.ForeignKey("pepe.id"))
+	# voted_pepe = db.relationship("Pepe", foreign_keys=[voted_pepe_id])
+	other_pepe_id = db.Column(db.Integer, db.ForeignKey("pepe.id"))
+	# other_pepe = db.relationship("Pepe", foreign_keys=[other_pepe_id])
+	timestamp = db.Column(db.DateTime, server_default=db.func.now())
+
+	def __repr__(self):
+		return "<Vote(voted_pepe_id={}, other_pepe_id={}>".format(self.voted_pepe_id, self.other_pepe_id)
+
 class PepeCombination:
 	def __init__(self, p1, p2):
 		global last_pending_votes_change
@@ -52,9 +63,13 @@ class PepeCombination:
 		self.u1 = str(uuid.uuid4())
 		self.u2 = str(uuid.uuid4())
 
-		def vote(more_rare_pepe, less_rare_pepe):
+		def vote(more_rare_pepe_id, less_rare_pepe_id):
 			def f():
+				more_rare_pepe = Pepe.query.get(more_rare_pepe_id)
 				more_rare_pepe.rareness += 1
+				v = Vote(voted_pepe_id = more_rare_pepe_id, other_pepe_id = less_rare_pepe_id)
+				print(v)
+				db.session.add(v)
 				db.session.commit()
 				if self.u1 in pending_votes:
 					del pending_votes[self.u1]
@@ -62,8 +77,8 @@ class PepeCombination:
 					del pending_votes[self.u2]
 			return f
 
-		self.v1 = vote(p1, p2)
-		self.v2 = vote(p2, p1)
+		self.v1 = vote(p1.id, p2.id)
+		self.v2 = vote(p2.id, p1.id)
 
 		check_pending()
 
