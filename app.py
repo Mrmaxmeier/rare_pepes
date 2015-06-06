@@ -1,6 +1,6 @@
 from flask import Flask, render_template, Response, stream_with_context
 from flask.ext.script import Manager
-from database import db, Pepe, PepeCombination, pending_votes
+from database import db, Pepe, PepeCombination, pending_votes, Vote
 import db_tools
 import sys
 import os
@@ -37,7 +37,7 @@ db.init_app(app)
 
 @app.route("/")
 def index():
-	return render_template("index.html", num_pepes=db.session.query(Pepe).count())
+	return render_template("index.html", num_pepes=db.session.query(Pepe).count(), num_votes=db.session.query(Vote).count())
 
 @app.route("/api/get_pepes", methods=["POST"])
 @json_out

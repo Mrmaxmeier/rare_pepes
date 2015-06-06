@@ -86,6 +86,8 @@ function vote(pepe) {
 	next_pepes()
 	console.log("voting for", uuid)
 	console.log("queue size:", pepe_queue.length)
+	$("#votes").attr("data-votes", parseInt($("#votes").attr("data-votes")) + 1)
+	$("#votes").text($("#votes").attr("data-votes") + " votes on record")
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', '/api/vote/'+uuid, true);
 	xhr.send(null);
