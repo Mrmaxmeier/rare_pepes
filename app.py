@@ -1,22 +1,20 @@
 from flask import Flask, render_template, Response, stream_with_context
 from flask.ext.script import Manager
-from database import db, Pepe, PepeCombination, pending_votes, Vote
+from database import db, Pepe, pending_votes, Vote
 import db_tools
-import sys
 import os
-import random
 import json
 from functools import wraps
 
 
 
-def json_out(f):
-	@wraps(f)
+def json_out(meth):
+	@wraps(meth)
 	def wrapper(*args, **kwargs):
 		def jsonify_wrap(obj):
 			return Response(json.dumps(obj), mimetype='application/json')
 
-		result = f(*args, **kwargs)
+		result = meth(*args, **kwargs)
 		if isinstance(result, tuple):
 			# (resp, status_code)
 			return jsonify_wrap(result[0]), result[1]
@@ -29,7 +27,6 @@ def json_out(f):
 		return result
 
 	return wrapper
-
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"]

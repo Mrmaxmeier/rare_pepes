@@ -19,6 +19,7 @@ class Pepe(db.Model):
 	rareness = db.Column(db.Float)
 	nsfw = db.Column(db.Boolean)
 	md5 = db.Column(db.String(32))
+	origin = db.Column(db.Text)
 
 	def __init__(self, link):
 		self.link = link
@@ -37,7 +38,8 @@ class Pepe(db.Model):
 		all_pepes = db.session.query(Pepe)
 		r1 = random.randrange(0, all_pepes.count())
 		r2 = random.randrange(1, all_pepes.count())
-		if r2 <= r1: r2 -= 1
+		if r2 <= r1:
+			r2 -= 1
 		db.session.expunge_all()
 		return PepeCombination(all_pepes[r1], all_pepes[r2])
 
