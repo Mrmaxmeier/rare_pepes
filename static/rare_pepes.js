@@ -52,12 +52,12 @@ $("#p2").on("click", function() {vote("p2")})
 // })
 
 $(document).keypress(function(e) {
-	switch (e.keyCode) {
-		case 97:
+	switch (e.key) {
+		case "a":
 			//a
 			vote("p1")
 			break;
-		case 100:
+		case "d":
 			//d
 			vote("p2")
 			break;

@@ -11,8 +11,10 @@ import hashlib
 
 c_id = os.environ.get("IMGUR_ID")
 c_secret = os.environ.get("IMGUR_SECRET")
-
-client = ImgurClient(c_id, c_secret)
+if c_id and c_secret:
+	client = ImgurClient(c_id, c_secret)
+else:
+	client = None
 
 unsaved_actions = 0
 
@@ -45,6 +47,8 @@ def build_db(app):
 		db.create_all()
 
 	if prompt_bool("Populate from 'rare pepes (tm)' album"):
+		if not client:
+			raise RuntimeError("no imgur credentials found")
 		for album in ["U2dTR"]:
 			for img in client.get_album_images(album):
 				add_from_img(img)
@@ -82,6 +86,8 @@ def deduplicate(app):
 	db.session.commit()
 
 def crawl_reddit(app, amount=20):
+	if not client:
+		raise RuntimeError("no imgur credentials found.")
 	r = praw.Reddit(user_agent='rare_pepes')
 	submissions = r.get_subreddit('pepethefrog').get_hot(limit=amount)
 	for s in submissions:
