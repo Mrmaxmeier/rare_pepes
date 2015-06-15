@@ -30,6 +30,7 @@ def json_out(meth):
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"]
+#app.config["SQLALCHEMY_ECHO"] = True
 db.init_app(app)
 
 @app.route("/")
@@ -65,6 +66,10 @@ def get_md5s():
 @manager.command
 def deduplicate():
 	db_tools.deduplicate(app)
+
+@manager.command
+def delete_invalid_votes():
+	db_tools.delete_invalid_votes(app)
 
 @manager.command
 def crawl_reddit(amount):

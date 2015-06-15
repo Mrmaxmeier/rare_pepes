@@ -3,8 +3,8 @@ from imgurpython.helpers.error import ImgurClientError
 from flask.ext.script import prompt_bool
 import praw
 from time import sleep
-from database import db, Pepe
-from sqlalchemy import func
+from database import db, Pepe, Vote
+from sqlalchemy import func, or_
 import requests
 import os
 import hashlib
@@ -59,7 +59,6 @@ def build_db(app):
 
 def get_md5s(app):
 	print("Downloading", Pepe.query.filter(Pepe.md5 == None).count(), "pepes...")
-	rs = []
 	try:
 		for pepe in Pepe.query.filter(Pepe.md5 == None).all():
 			r = requests.get(pepe.link)
@@ -75,17 +74,29 @@ def get_md5s(app):
 
 def deduplicate(app):
 	print("Deduplicating", Pepe.query.filter(Pepe.md5 != None).count(), "pepes...")
-	q = Pepe.query.filter(Pepe.md5.in_(
+	q = Pepe.query.filter(Pepe.md5.in_(\
 			db.session.query(Pepe.md5)\
 					.group_by(Pepe.md5)\
-					.having(func.count(Pepe.md5) > 1)
-	))
-	for pepe in q.all():
+					.having(func.count(Pepe.md5) > 1)))
+	for pepe in q.order_by(Pepe.id.desc()).all():
 		if Pepe.query.filter(Pepe.md5 == pepe.md5).count() > 1:
-			print("Duplicate found", pepe)
+			print(Pepe.query.filter(Pepe.md5 == pepe.md5).count(), "duplicate(s) found", pepe)
+			vq = Vote.query.filter(or_(Vote.voted_pepe_id == pepe.id, Vote.other_pepe_id == pepe.id))
+			print("deleting", vq.count(), "vote(s)")
+			for vote in vq.all():
+				db.session.delete(vote)
+			db.session.commit()
 			db.session.delete(pepe)
+			print("deleted pepe")
 			save_if_due()
 	db.session.commit()
+
+def delete_invalid_votes(app):
+	q = Vote.query.filter(\
+		Vote.other_pepe_id.notin_(db.session.query(Pepe.id)) or\
+		Vote.other_pepe_id.notin_(db.session.query(Pepe.id)))
+	for vote in q.all():
+		print(vote)
 
 def crawl_reddit(app, amount=20):
 	if not client:
