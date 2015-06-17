@@ -70,6 +70,10 @@ def deduplicate():
 def crawl_reddit(amount):
 	db_tools.crawl_reddit(app, amount=int(amount))
 
+@manager.command
+def rebuild_rareness():
+	db_tools.rebuild_rareness(app)
+
 
 if __name__ == '__main__':
 	manager.run()

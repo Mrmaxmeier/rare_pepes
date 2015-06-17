@@ -3,7 +3,7 @@ from imgurpython.helpers.error import ImgurClientError
 from flask.ext.script import prompt_bool
 import praw
 from time import sleep
-from database import db, Pepe
+from database import db, Pepe, Vote
 from sqlalchemy import func
 import requests
 import os
@@ -114,3 +114,16 @@ def crawl_reddit(app, amount=20):
 				print(e.status_code)
 	print("finished crawling")
 	db.session.commit()
+
+def rebuild_rareness(app):
+	print("resetting pepes.")
+	for pepe in Pepe.query.all():
+		pepe.rareness = 0
+	print("rebuilding rareness.")
+	for v in Vote.query.all():
+		v.execute()
+		save_if_due()
+		print(".", end="")
+	print("finished rebuilding")
+	db.session.commit()
+	print("saved.")

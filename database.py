@@ -54,6 +54,10 @@ class Vote(db.Model):
 	# other_pepe = db.relationship("Pepe", foreign_keys=[other_pepe_id])
 	timestamp = db.Column(db.DateTime, server_default=db.func.now())
 
+	def execute(self):
+		more_rare_pepe = Pepe.query.get(self.voted_pepe_id)
+		more_rare_pepe.rareness += 1
+
 	def __repr__(self):
 		return "<Vote(voted_pepe_id={}, other_pepe_id={}>".format(self.voted_pepe_id, self.other_pepe_id)
 
@@ -67,10 +71,9 @@ class PepeCombination:
 
 		def vote(more_rare_pepe_id, less_rare_pepe_id):
 			def f():
-				more_rare_pepe = Pepe.query.get(more_rare_pepe_id)
-				more_rare_pepe.rareness += 1
 				v = Vote(voted_pepe_id = more_rare_pepe_id, other_pepe_id = less_rare_pepe_id)
 				print(v)
+				v.execute()
 				db.session.add(v)
 				db.session.commit()
 				if self.u1 in pending_votes:
