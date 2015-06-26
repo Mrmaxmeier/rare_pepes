@@ -17,6 +17,7 @@ class Pepe(db.Model):
 	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 	link = db.Column(db.Text)
 	rareness = db.Column(db.Float)
+	visits = db.Column(db.Integer)
 	nsfw = db.Column(db.Boolean)
 	md5 = db.Column(db.String(32))
 	origin = db.Column(db.Text)
@@ -24,6 +25,7 @@ class Pepe(db.Model):
 	def __init__(self, link):
 		self.link = link
 		self.rareness = 0
+		self.visits = 0
 
 	def info(self):
 		return {
@@ -43,8 +45,26 @@ class Pepe(db.Model):
 		db.session.expunge_all()
 		return PepeCombination(all_pepes[r1], all_pepes[r2])
 
+	@classmethod
+	def rarest(cls):
+		return cls.query.order_by(cls.rareness.desc()).first()
+
+	@classmethod
+	def least_rare(cls):
+		return cls.query.first()
+
+	@classmethod
+	def most_controversial(cls, num=10):
+		q = cls.query
+		## sql-side stuff
+		#q = q.order_by(cls.rareness)
+		#qc = q.count()
+		#q = q.slice(qc//2 - num, qc//2 + num)
+		return sorted(q.all(), key=lambda p: p.visits * abs(0.5 - p.rareness))[-10::-1]
+
 	def __repr__(self):
-		return "<Pepe(id={}, link={}, rareness={}, nsfw={}>".format(self.id, self.link, self.rareness, self.nsfw)
+		return "<Pepe(id={}, link={}, rareness={}, visits={}, nsfw={}>".format(\
+			self.id, self.link, self.rareness, self.visits, self.nsfw)
 
 class Vote(db.Model):
 	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -55,8 +75,12 @@ class Vote(db.Model):
 	timestamp = db.Column(db.DateTime, server_default=db.func.now())
 
 	def execute(self):
+		## not query for votes!
 		more_rare_pepe = Pepe.query.get(self.voted_pepe_id)
 		more_rare_pepe.rareness += 1
+		less_rare_pepe = Pepe.query.get(self.other_pepe_id)
+		more_rare_pepe.visits += 1
+		less_rare_pepe.visits += 1
 
 	def __repr__(self):
 		return "<Vote(voted_pepe_id={}, other_pepe_id={}>".format(self.voted_pepe_id, self.other_pepe_id)

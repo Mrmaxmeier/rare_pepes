@@ -3,6 +3,7 @@ sqlalchemy
 Flask-SQLAlchemy
 imgurpython
 Flask-Script
+Flask-Migrate>=1.4.0
 psycopg2
 requests
 praw

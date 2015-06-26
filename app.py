@@ -1,5 +1,6 @@
 from flask import Flask, render_template, Response, stream_with_context
 from flask.ext.script import Manager
+from flask.ext.migrate import Migrate, MigrateCommand
 from database import db, Pepe, pending_votes, Vote
 import db_tools
 import os
@@ -79,6 +80,8 @@ def crawl_reddit(amount):
 def rebuild_rareness():
 	db_tools.rebuild_rareness(app)
 
+migrate = Migrate(app, db)
+manager.add_command('db', MigrateCommand)
 
 if __name__ == '__main__':
 	manager.run()

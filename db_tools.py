@@ -8,6 +8,8 @@ from sqlalchemy import func, or_
 import requests
 import os
 import hashlib
+import sys
+
 
 c_id = os.environ.get("IMGUR_ID")
 c_secret = os.environ.get("IMGUR_SECRET")
@@ -18,13 +20,14 @@ else:
 
 unsaved_actions = 0
 
-def save_if_due():
+def save_if_due(m = 100):
 	global unsaved_actions
 	unsaved_actions += 1
-	if unsaved_actions >= 100:
+	if unsaved_actions >= m:
 		unsaved_actions = 0
 		print("saving")
 		db.session.commit()
+		return True
 
 def add_from_img(img, nsfw=False, origin=None):
 	pepe = Pepe(link=img.link)
@@ -131,10 +134,13 @@ def rebuild_rareness(app):
 	for pepe in Pepe.query.all():
 		pepe.rareness = 0
 	print("rebuilding rareness.")
-	for v in Vote.query.all():
+	count = Vote.query.count()
+	for i, v in enumerate(Vote.query):
 		v.execute()
-		save_if_due()
 		print(".", end="")
-	print("finished rebuilding")
+		sys.stdout.flush()
+		if save_if_due(max(100, count // 10)):
+			print(i, "/", count)
+	print("\nfinished rebuilding")
 	db.session.commit()
 	print("saved.")
