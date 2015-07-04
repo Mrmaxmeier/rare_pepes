@@ -6,9 +6,10 @@ var p2_loader_timeout;
 var pepe_queue = [];
 var preload = 5;
 var max_queue_size = 7;
+var status_bar_last = 0;
 
 function next_pepes() {
-	console.log("setting pepes", pepe_queue[0])
+	console.log("setting pepes", pepe_queue[0]);
 
 	// p1_loader_timeout = setTimeout(function(){
 	// 	$("#p1dimmer").addClass("active")
@@ -17,29 +18,63 @@ function next_pepes() {
 	// 	$("#p2dimmer").addClass("active")
 	// }, 500);
 
-	$("#p1").attr("src", pepe_queue[0][0])
-	$("#p2").attr("src", pepe_queue[0][2])
+	if (pepe_queue.length > 1)
+		pepe_queue.splice(0, 1);
+
+	$("#p1").attr("src", pepe_queue[0][0]);
+	$("#p2").attr("src", pepe_queue[0][2]);
 }
 
+function update_status_bar() {
+	var loaded = 0;
+	for (var i = pepe_queue.length - 1; i >= 0; i--) {
+		if (pepe_queue[i][3])
+			loaded += 1;
+		if (pepe_queue[i][4])
+			loaded += 1;
+	}
+	var progress = loaded / (pepe_queue.length * 2);
+	console.log(status_bar_last, progress);
+	if (progress < 0.8 || progress > status_bar_last) {
+		console.log("set", progress);
+		NProgress.set(progress);
+	} else if (progress >= 1) {
+		NProgress.done();
+	}
+	status_bar_last = progress;
+}
+
+NProgress.configure({ showSpinner: false, trickle: false, easing: 'ease', speed: 2500 });
+NProgress.start();
+
 function preload_pepes(data) {
-	$("<img />").attr("src", data[0]);
-	$("<img />").attr("src", data[2]);
+	$("<img />").attr("src", data[0]).one("load", function() {
+		data[3] = true;
+		update_status_bar();
+	}).each(function() {if (this.complete) $(this).load();});
+	$("<img />").attr("src", data[2]).one("load", function() {
+		data[4] = true;
+		update_status_bar();
+	}).each(function() {if (this.complete) $(this).load();});
 }
 
 function process_pepes(data) {
 	if (pepe_queue.length >= max_queue_size) {
-		console.log("max pepe queue size exceeded:", pepe_queue.length)
-		return
+		console.log("max pepe queue size exceeded:", pepe_queue.length);
+		return;
 	}
-	data[0] = data[0].replace("http://", "//")
-	data[2] = data[2].replace("http://", "//")
-	console.log("processing pepes", data)
-	preload_pepes(data)
-	pepe_queue.push(data)
+	data[0] = data[0].replace("http://", "//");
+	data[2] = data[2].replace("http://", "//");
+	console.log("processing pepes", data);
+	data.push(false); // is_loaded
+	data.push(false);
+	preload_pepes(data);
+	pepe_queue.push(data);
+	update_status_bar();
 }
 
-$("#p1").on("click", function() {vote("p1")})
-$("#p2").on("click", function() {vote("p2")})
+$("#p1").on("click", function() {vote("p1");});
+$("#p2").on("click", function() {vote("p2");});
 
 // $("#p1").bind("load", function() {
 // 	$("#p1dimmer").removeClass("active")
@@ -55,56 +90,57 @@ $(document).keypress(function(e) {
 	switch (e.which) {
 		case 97:
 			//a
-			vote("p1")
+			vote("p1");
 			break;
 		case 100:
 			//d
-			vote("p2")
+			vote("p2");
 			break;
 	}
 });
 
 function vote(pepe) {
 	if (pepe_queue.length < 3) {
-		console.log("loading emergency pepes...")
-		$.post("/api/get_pepes", {}, process_pepes)
-		$.post("/api/get_pepes", {}, process_pepes)
+		console.log("loading emergency pepes...");
+		$.post("/api/get_pepes", {}, process_pepes);
+		$.post("/api/get_pepes", {}, process_pepes);
 	}
 	if (pepe_queue.length < 2) {
-		console.log("not enough emergency pepes...")
-		return
+		console.log("not enough emergency pepes...");
+		return;
 	}
 	switch (pepe) {
 		case "p1":
 			var uuid = pepe_queue[0][1];
-			break
+			break;
 		case "p2":
 			var uuid = pepe_queue[0][3];
-			break
+			break;
 	}
-	pepe_queue.splice(0, 1);
-	next_pepes()
-	console.log("voting for", uuid)
-	console.log("queue size:", pepe_queue.length)
-	$("#votes").attr("data-votes", parseInt($("#votes").attr("data-votes")) + 1)
-	$("#votes").text($("#votes").attr("data-votes") + " votes on record")
-	var xhr = new XMLHttpRequest();
-	xhr.open('POST', '/api/vote/'+uuid, true);
-	xhr.send(null);
-	xhr.onreadystatechange = function(e) {
-		if (xhr.response) {
-			var data = JSON.parse(xhr.response)
-			xhr.abort()
-			process_pepes(data)
-		}
-	}
+	next_pepes();
+	setTimeout(function () {
+		console.log("voting for", uuid);
+		console.log("queue size:", pepe_queue.length);
+		$("#votes").attr("data-votes", parseInt($("#votes").attr("data-votes")) + 1);
+		$("#votes").text($("#votes").attr("data-votes") + " votes on record");
+		var xhr = new XMLHttpRequest();
+		xhr.open('POST', '/api/vote/'+uuid, true);
+		xhr.send(null);
+		xhr.onreadystatechange = function(e) {
+			if (xhr.response) {
+				var data = JSON.parse(xhr.response);
+				xhr.abort();
+				process_pepes(data);
+			}
+		};
+	}, 0);
 }
 
 $.post("/api/get_pepes", {}, function (data) {
-	process_pepes(data)
-	next_pepes()
-})
+	process_pepes(data);
+	next_pepes();
+});
 
 for (var i = 0; i < preload-1; i++) {
-	$.post("/api/get_pepes", {}, process_pepes)
-};
+	$.post("/api/get_pepes", {}, process_pepes);
+}
