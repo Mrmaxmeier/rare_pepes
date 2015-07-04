@@ -4,8 +4,8 @@ var p1_loader_timeout;
 var p2_loader_timeout;
 
 var pepe_queue = [];
-var preload = 5;
-var max_queue_size = 7;
+var preload = 7;
+var max_queue_size = 10;
 
 function next_pepes() {
 	console.log("setting pepes", pepe_queue[0]);
@@ -27,14 +27,14 @@ function next_pepes() {
 function update_status_bar() {
 	var loaded = 0;
 	for (var i = pepe_queue.length - 1; i >= 0; i--) {
-		if (pepe_queue[i][3])
-			loaded += 1;
 		if (pepe_queue[i][4])
+			loaded += 1;
+		if (pepe_queue[i][5])
 			loaded += 1;
 	}
 	var progress = loaded / (pepe_queue.length * 2);
 	//console.log(status_bar_last, progress);
-	if (NProgress.isStarted() || progress < 0.8)
+	if (NProgress.isStarted() || progress < 0.7)
 		NProgress.set(progress);
 }
 
@@ -43,11 +43,11 @@ NProgress.start();
 
 function preload_pepes(data) {
 	$("<img />").attr("src", data[0]).one("load", function() {
-		data[3] = true;
+		data[4] = true;
 		update_status_bar();
 	}).each(function() {if (this.complete) $(this).load();});
 	$("<img />").attr("src", data[2]).one("load", function() {
-		data[4] = true;
+		data[5] = true;
 		update_status_bar();
 	}).each(function() {if (this.complete) $(this).load();});
 }
@@ -117,16 +117,10 @@ function vote(pepe) {
 		console.log("queue size:", pepe_queue.length);
 		$("#votes").attr("data-votes", parseInt($("#votes").attr("data-votes")) + 1);
 		$("#votes").text($("#votes").attr("data-votes") + " votes on record");
-		var xhr = new XMLHttpRequest();
-		xhr.open('POST', '/api/vote/'+uuid, true);
-		xhr.send(null);
-		xhr.onreadystatechange = function(e) {
-			if (xhr.response) {
-				var data = JSON.parse(xhr.response);
-				xhr.abort();
-				process_pepes(data);
-			}
-		};
+
+		$.post("/api/vote/"+uuid, {}, function (data) {
+			process_pepes(data);
+		});
 	}, 0);
 }
 

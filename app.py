@@ -44,15 +44,13 @@ def get_pepes(nsfw=False):
 	return Pepe.get_two().info()
 
 @app.route("/api/vote/<string:uuid>", methods=["POST"])
+@json_out
 def vote(uuid):
-	def generate():
-		yield json.dumps(Pepe.get_two().info())
-		if uuid in pending_votes:
-			pending_votes[uuid]()
-		else:
-			print("invalid vote", uuid)
-	return Response(stream_with_context(generate()), mimetype='application/json')
-
+	if uuid in pending_votes:
+		pending_votes[uuid]()
+	else:
+		print("invalid vote", uuid)
+	return Pepe.get_two().info()
 
 manager = Manager(app)
 
