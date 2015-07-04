@@ -6,7 +6,6 @@ var p2_loader_timeout;
 var pepe_queue = [];
 var preload = 5;
 var max_queue_size = 7;
-var status_bar_last = 0;
 
 function next_pepes() {
 	console.log("setting pepes", pepe_queue[0]);
@@ -34,14 +33,9 @@ function update_status_bar() {
 			loaded += 1;
 	}
 	var progress = loaded / (pepe_queue.length * 2);
-	console.log(status_bar_last, progress);
-	if (progress < 0.8 || progress > status_bar_last) {
-		console.log("set", progress);
+	//console.log(status_bar_last, progress);
+	if (NProgress.isStarted() || progress < 0.8)
 		NProgress.set(progress);
-	} else if (progress >= 1) {
-		NProgress.done();
-	}
-	status_bar_last = progress;
 }
 
 NProgress.configure({ showSpinner: false, trickle: false, easing: 'ease', speed: 2500 });
