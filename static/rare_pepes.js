@@ -1,27 +1,23 @@
 $(".ui.checkbox").checkbox();
 
-var p1_loader_timeout;
-var p2_loader_timeout;
-
 var pepe_queue = [];
+var current_pepes;
 var preload = 7;
 var max_queue_size = 10;
 
 function next_pepes() {
-	console.log("setting pepes", pepe_queue[0]);
+	current_pepes = pepe_queue[0];
+	console.log("setting pepes", current_pepes);
 
-	// p1_loader_timeout = setTimeout(function(){
-	// 	$("#p1dimmer").addClass("active")
-	// }, 500);
-	// p2_loader_timeout = setTimeout(function(){
-	// 	$("#p2dimmer").addClass("active")
-	// }, 500);
+	pepe_queue.splice(0, 1);
 
-	if (pepe_queue.length > 1)
-		pepe_queue.splice(0, 1);
+	if (!current_pepes[4])
+		$("#p1dimmer").addClass("active");
+	if (!current_pepes[5])
+		$("#p2dimmer").addClass("active");
 
-	$("#p1").attr("src", pepe_queue[0][0]);
-	$("#p2").attr("src", pepe_queue[0][2]);
+	$("#p1").attr("src", current_pepes[0]);
+	$("#p2").attr("src", current_pepes[2]);
 }
 
 function update_status_bar() {
@@ -41,14 +37,27 @@ function update_status_bar() {
 NProgress.configure({ showSpinner: false, trickle: false, easing: 'ease', speed: 2500 });
 NProgress.start();
 
+function pepe_preloaded(data, pepe) {
+	switch (pepe) {
+		case "p1":
+			data[4] = true;
+			if (data == pepe_queue[0])
+				$("#p1dimmer").removeClass("active");
+			break;
+		case "p2":
+			data[5] = true;
+			if (data == pepe_queue[0])
+				$("#p2dimmer").removeClass("active");
+	}
+	update_status_bar();
+}
+
 function preload_pepes(data) {
 	$("<img />").attr("src", data[0]).one("load", function() {
-		data[4] = true;
-		update_status_bar();
+		pepe_preloaded(data, "p1");
 	}).each(function() {if (this.complete) $(this).load();});
 	$("<img />").attr("src", data[2]).one("load", function() {
-		data[5] = true;
-		update_status_bar();
+		pepe_preloaded(data, "p2");
 	}).each(function() {if (this.complete) $(this).load();});
 }
 
@@ -97,18 +106,19 @@ function vote(pepe) {
 	if (pepe_queue.length < 3) {
 		console.log("loading emergency pepes...");
 		$.post("/api/get_pepes", {}, process_pepes);
-		$.post("/api/get_pepes", {}, process_pepes);
 	}
 	if (pepe_queue.length < 2) {
 		console.log("not enough emergency pepes...");
+		if (!NProgress.isStarted())
+			NProgress.start();
 		return;
 	}
 	switch (pepe) {
 		case "p1":
-			var uuid = pepe_queue[0][1];
+			var uuid = current_pepes[1];
 			break;
 		case "p2":
-			var uuid = pepe_queue[0][3];
+			var uuid = current_pepes[3];
 			break;
 	}
 	next_pepes();
