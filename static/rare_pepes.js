@@ -41,12 +41,12 @@ function pepe_preloaded(data, pepe) {
 	switch (pepe) {
 		case "p1":
 			data[4] = true;
-			if (data == pepe_queue[0])
+			if (data == current_pepes)
 				$("#p1dimmer").removeClass("active");
 			break;
 		case "p2":
 			data[5] = true;
-			if (data == pepe_queue[0])
+			if (data == current_pepes)
 				$("#p2dimmer").removeClass("active");
 	}
 	update_status_bar();
@@ -78,16 +78,6 @@ function process_pepes(data) {
 
 $("#p1").on("click", function() {vote("p1");});
 $("#p2").on("click", function() {vote("p2");});
-
-// $("#p1").bind("load", function() {
-// 	$("#p1dimmer").removeClass("active")
-// 	clearTimeout(p1_loader_timeout)
-// })
-
-// $("#p2").bind("load", function() {
-// 	$("#p2dimmer").removeClass("active")
-// 	clearTimeout(p2_loader_timeout)
-// })
 
 $(document).keypress(function(e) {
 	switch (e.which) {
