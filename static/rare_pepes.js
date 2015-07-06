@@ -11,13 +11,14 @@ function next_pepes() {
 
 	pepe_queue.splice(0, 1);
 
+	$("#p1").attr("src", current_pepes[0]);
+	$("#p2").attr("src", current_pepes[2]);
+
 	if (!current_pepes[4])
 		$("#p1dimmer").addClass("active");
 	if (!current_pepes[5])
 		$("#p2dimmer").addClass("active");
 
-	$("#p1").attr("src", current_pepes[0]);
-	$("#p2").attr("src", current_pepes[2]);
 }
 
 function update_status_bar() {
@@ -93,6 +94,7 @@ $(document).keypress(function(e) {
 });
 
 function vote(pepe) {
+	console.log("vote started");
 	if (pepe_queue.length < 3) {
 		console.log("loading emergency pepes...");
 		$.post("/api/get_pepes", {}, process_pepes);
@@ -103,12 +105,13 @@ function vote(pepe) {
 			NProgress.start();
 		return;
 	}
+	var uuid;
 	switch (pepe) {
 		case "p1":
-			var uuid = current_pepes[1];
+			uuid = current_pepes[1];
 			break;
 		case "p2":
-			var uuid = current_pepes[3];
+			uuid = current_pepes[3];
 			break;
 	}
 	next_pepes();
@@ -132,3 +135,14 @@ $.post("/api/get_pepes", {}, function (data) {
 for (var i = 0; i < preload-1; i++) {
 	$.post("/api/get_pepes", {}, process_pepes);
 }
+
+FastClick.attach(document.body);
+
+$(window).on("resize", function() {
+	if ($(document).width() > 800) {
+		$(".menu_big").show();
+	} else {
+		$(".menu_big").hide();
+	}
+});
+

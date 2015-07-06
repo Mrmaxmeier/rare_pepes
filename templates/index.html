@@ -2,9 +2,22 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-		<link rel="apple-touch-icon" href="{{ url_for('static', filename='touch-icon.png') }}">
 		<title>rare_pepes</title>
+		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+		<!-- Webapp Stuffs -->
+		<link rel="apple-touch-icon" href="{{ url_for('static', filename='touch-icon.png') }}">
+		<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+		<meta name="viewport" content="width=device-width, initial-scale=0.7">
+
+		<meta name="theme-color" content="#607D8B">
+		<meta name="mobile-web-app-capable" content="yes">
+
+		<meta name="apple-mobile-web-app-title" content="rare_pepes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 
 		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.0.0/semantic.min.css">
@@ -12,6 +25,16 @@
 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css">
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js"></script>
+
+		<script>
+		// Service workers require HTTPS (http://goo.gl/lq4gCo). If we're running on a real web server
+		// (as opposed to localhost on a custom port, which is whitelisted), then change the protocol to HTTPS.
+		if ((!location.port || location.port == "80") && location.protocol != 'https:') {
+			location.protocol = 'https:';
+		}
+		</script>
 
 		<style>
 		#nprogress .bar {
@@ -31,9 +54,8 @@
 		<nav class="ui menu inverted navbar page grid">
 			<a href="/" class="brand active item">rare_pepes</a>
 			<div class="right menu">
-				<a href="#" class="item" onclick="$('.ui.modal').modal('show')">tutorial</a>
-				<a href="/single_pepe_mode" class="item">single-pepe-mode</a>
-				<a href="https://imgur.com/a/U2dTR" class="item">rare pepes, do not steel</a>
+				<a href="#" class="item menu_big" onclick="$('.ui.modal').modal('show')">tutorial</a>
+				<a href="https://imgur.com/a/U2dTR" class="item menu_big">rare pepes, do not steel</a>
 				<!--<div class="ui segment" style="padding: 0.5rem;">
 					<div class="ui toggle checkbox checked">
 						<input type="checkbox">
@@ -83,5 +105,11 @@
 			</div>
 		</div>
 		<script type="text/javascript" src="{{ url_for('static', filename='rare_pepes.js') }}"></script>
+
+		<script type="text/javascript">
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.register('service-worker.js', {scope: './'});
+		}
+		</script>
 	</body>
 </html>
