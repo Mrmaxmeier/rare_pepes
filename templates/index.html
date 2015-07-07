@@ -1,115 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>rare_pepes</title>
-		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+{% extends "base.html" %}
 
-		<!-- Webapp Stuffs -->
-		<link rel="apple-touch-icon" href="{{ url_for('static', filename='touch-icon.png') }}">
-		<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-		<meta name="viewport" content="width=device-width, initial-scale=0.7">
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js"></script>
 
-		<meta name="theme-color" content="#607D8B">
-		<meta name="mobile-web-app-capable" content="yes">
+<style>
+	#nprogress .bar {
+		height: 4px;
+	}
 
-		<meta name="apple-mobile-web-app-title" content="rare_pepes">
-		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	.pepe {
+		width: 100%;
+		height: 100%;
+		min-height: 100%;
+		min-width: 100%;
+		cursor: pointer;
+	}
+</style>
 
+{% endblock %}
 
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+{% block body %}
 
-		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.0.0/semantic.min.css">
-		<script src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.0.0/semantic.min.js"></script>
-
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css">
-
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js"></script>
-
-		<script>
-		// Service workers require HTTPS (http://goo.gl/lq4gCo). If we're running on a real web server
-		// (as opposed to localhost on a custom port, which is whitelisted), then change the protocol to HTTPS.
-		if ((!location.port || location.port == "80") && location.protocol != 'https:') {
-			location.protocol = 'https:';
-		}
-		</script>
-
-		<style>
-		#nprogress .bar {
-			height: 4px;
-		}
-
-		.pepe {
-			width: 100%;
-			height: 100%;
-			min-height: 100%;
-			min-width: 100%;
-			cursor: pointer;
-		}
-		</style>
-	</head>
-	<body>
-		<nav class="ui menu inverted navbar page grid">
-			<a href="/" class="brand active item">rare_pepes</a>
-			<div class="right menu">
-				<a href="#" class="item menu_big" onclick="$('.ui.modal').modal('show')">tutorial</a>
-				<a href="https://imgur.com/a/U2dTR" class="item menu_big">rare pepes, do not steel</a>
-				<!--<div class="ui segment" style="padding: 0.5rem;">
-					<div class="ui toggle checkbox checked">
-						<input type="checkbox">
-						<label>NSFW</label>
-					</div>
-				</div>-->
-				<span class="item">{{num_pepes}} pepes on record</span>
-				<span id="votes" class="item" data-votes={{num_votes}}>{{num_votes}} votes on record</span>
-			</div>
-		</nav>
-		<div class="ui two column middle aligned very relaxed fitted stackable grid">
-			<div class="column" id="p1c">
-				<img id="p1" class="pepe"/>
-				<div id="p1dimmer" class="ui dimmer">
-					<div class="ui text loader">Loading</div>
-				</div>
-			</div>
-			<div class="ui vertical divider">Or</div>
-			<div class="column" id="p2c">
-				<img id="p2" class="pepe"/>
-				<div id="p2dimmer" class="ui dimmer">
-					<div class="ui text loader">Loading</div>
-				</div>
-			</div>
+<div class="ui two column middle aligned very relaxed fitted stackable grid">
+	<div class="column" id="p1c">
+		<img id="p1" class="pepe"/>
+		<div id="p1dimmer" class="ui dimmer">
+			<div class="ui text loader">Loading</div>
 		</div>
-
-		<div class="ui modal">
-			<i class="close icon"></i>
-			<div class="header">
-				Tutorial
-			</div>
-			<div class="content">
-				<div class="ui medium image">
-					<img src="http://i3.kym-cdn.com/photos/images/original/000/862/065/0e9.jpg">
-				</div>
-				<div class="description">
-					<div class="ui header">How does this work?</div>
-					<p>Every turn you're presented with two pepes.</p>
-					<p>Click on the pepe you're the least fammiliar with.</p>
-				</div>
-			</div>
-			<div class="actions">
-				<div class="ui positive right labeled icon button">
-					Ok
-					<i class="checkmark icon"></i>
-				</div>
-			</div>
+	</div>
+	<div class="ui vertical divider">Or</div>
+	<div class="column" id="p2c">
+		<img id="p2" class="pepe"/>
+		<div id="p2dimmer" class="ui dimmer">
+			<div class="ui text loader">Loading</div>
 		</div>
-		<script type="text/javascript" src="{{ url_for('static', filename='rare_pepes.js') }}"></script>
+	</div>
+</div>
 
-		<script type="text/javascript">
-		if ('serviceWorker' in navigator) {
-			navigator.serviceWorker.register('service-worker.js', {scope: './'});
-		}
-		</script>
-	</body>
-</html>
+<div class="ui modal">
+	<i class="close icon"></i>
+	<div class="header">
+		Tutorial
+	</div>
+	<div class="content">
+		<div class="ui medium image">
+			<img src="http://i3.kym-cdn.com/photos/images/original/000/862/065/0e9.jpg">
+		</div>
+		<div class="description">
+			<div class="ui header">How does this work?</div>
+			<p>Every turn you're presented with two pepes.</p>
+			<p>Click on the pepe you're the least fammiliar with.</p>
+		</div>
+	</div>
+	<div class="actions">
+		<div class="ui positive right labeled icon button">
+			Ok
+			<i class="checkmark icon"></i>
+		</div>
+	</div>
+</div>
+<script type="text/javascript" src="{{ url_for('static', filename='rare_pepes.js') }}"></script>
+
+{% endblock %}

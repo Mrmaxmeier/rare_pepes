@@ -56,11 +56,10 @@ class Pepe(db.Model):
 	@classmethod
 	def most_controversial(cls, num=10):
 		q = cls.query
-		## sql-side stuff
 		#q = q.order_by(cls.rareness)
 		#qc = q.count()
 		#q = q.slice(qc//2 - num, qc//2 + num)
-		return sorted(q.all(), key=lambda p: p.visits * abs(0.5 - p.rareness))[-10::-1]
+		return sorted(q.all(), key=lambda p: p.visits * abs(0.5 - p.rareness))[-num:][::-1]
 
 	def __repr__(self):
 		return "<Pepe(id={}, link={}, rareness={}, visits={}, nsfw={}>".format(\
@@ -75,7 +74,7 @@ class Vote(db.Model):
 	timestamp = db.Column(db.DateTime, server_default=db.func.now())
 
 	def execute(self):
-		## not query for votes!
+		## dont query for votes!
 		more_rare_pepe = Pepe.query.get(self.voted_pepe_id)
 		more_rare_pepe.rareness += 1
 		less_rare_pepe = Pepe.query.get(self.other_pepe_id)
@@ -95,7 +94,7 @@ class PepeCombination:
 
 		def vote(more_rare_pepe_id, less_rare_pepe_id):
 			def f():
-				v = Vote(voted_pepe_id = more_rare_pepe_id, other_pepe_id = less_rare_pepe_id)
+				v = Vote(voted_pepe_id=more_rare_pepe_id, other_pepe_id=less_rare_pepe_id)
 				print(v)
 				v.execute()
 				db.session.add(v)
