@@ -2,8 +2,8 @@ $(".ui.checkbox").checkbox();
 
 var pepe_queue = [];
 var current_pepes;
-var preload = 7;
-var max_queue_size = 10;
+var preload = 10;
+var max_queue_size = 15;
 
 function next_pepes() {
 	current_pepes = pepe_queue[0];
