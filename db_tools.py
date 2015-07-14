@@ -20,7 +20,7 @@ else:
 
 unsaved_actions = 0
 
-def save_if_due(m = 100):
+def save_if_due(m=100):
 	global unsaved_actions
 	unsaved_actions += 1
 	if unsaved_actions >= m:

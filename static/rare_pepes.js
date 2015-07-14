@@ -138,11 +138,24 @@ for (var i = 0; i < preload-1; i++) {
 
 FastClick.attach(document.body);
 
+var currwidth = 0;
+var mobile_threshold = 801;
+
 $(window).on("resize", function() {
-	if ($(document).width() > 800) {
+	if ($(document).width() > mobile_threshold && (currwidth == 0 || currwidth <= mobile_threshold)) {
+		console.log("desktop layout");
 		$(".menu_big").show();
-	} else {
+		$(".ui.divider").css("height", "");
+		$(".column").css("height", "");
+	} else if ($(document).width() <= mobile_threshold && (currwidth == 0 || currwidth > mobile_threshold)) {
+		console.log("mobile layout");
 		$(".menu_big").hide();
+		$(".ui.divider").css("height", "0px");
+		$(".column").css("height", "45vh");
 	}
+
+	currwidth = $(document).width();
 });
+
+$(window).trigger("resize");
 
