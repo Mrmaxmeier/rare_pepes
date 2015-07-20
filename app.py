@@ -35,6 +35,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"]
 db.init_app(app)
 
 @app.route("/")
+@app.route("/index")
 def index():
 	return render_template("index.html", num_pepes=db.session.query(Pepe).count(), num_votes=db.session.query(Vote).count())
 
